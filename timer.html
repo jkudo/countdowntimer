@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>カウントダウンタイマー</title>
+<style>
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: black;
+  color: white;
+  overflow: hidden;
+}
+
+#timer {
+  font-size: 30vw;
+  font-weight: bold;
+  transition: color 1s;
+}
+
+button {
+  font-size: 1.5em;
+  padding: 0.5em 1em;
+  margin: 0.5em;
+  cursor: pointer;
+}
+
+#controls {
+  position: fixed;
+  bottom: 20px;
+  text-align: center;
+  width: 100%;
+  z-index: 10;
+}
+
+#customTimeInput {
+  font-size: 1.5em;
+  margin: 0.5em;
+  width: 100px; /* テキストボックスの幅を短く設定 */
+}
+
+.red {
+  color: red;
+}
+
+.hidden {
+  display: none;
+}
+
+</style>
+</head>
+<body>
+
+<div id="timer">00:00</div>
+
+<div id="controls">
+  <button onclick="setTimer(300)">5分</button>
+  <button onclick="setTimer(600)">10分</button>
+  <button onclick="setTimer(900)">15分</button>
+  <button onclick="setTimer(1800)">30分</button>
+  <input type="text" id="customTimeInput" placeholder="分入力" />
+  <button onclick="setCustomTimer()">開始</button>
+  <button onclick="resetTimer()">リセット</button> <!-- リセットボタンを追加 -->
+</div>
+
+<script>
+let countdownTimer;
+let timeLeft = 0;
+let running = false;
+
+function setTimer(seconds) {
+  if (!running) {
+    timeLeft = seconds;
+    startTimer();
+  }
+}
+
+function setCustomTimer() {
+  let minutes = parseInt(document.getElementById('customTimeInput').value, 10);
+  if (!isNaN(minutes) && minutes > 0) {
+    setTimer(minutes * 60);
+  } else {
+    alert("正しい数値を入力してください。");
+  }
+}
+
+function startTimer() {
+  clearInterval(countdownTimer);
+  updateDisplay(timeLeft);
+  countdownTimer = setInterval(updateTimer, 1000);
+  running = true;
+  document.getElementById('customTimeInput').value = ''; // テキストボックスをクリア
+}
+
+function stopTimer() {
+  clearInterval(countdownTimer);
+  running = false;
+}
+
+function updateTimer() {
+  timeLeft -= 1;
+  if (timeLeft <= 0) {
+    stopTimer();
+    document.getElementById('timer').innerHTML = '終了';
+    document.getElementById('timer').classList.add('red');
+  } else {
+    if (timeLeft <= 60) {
+      document.getElementById('timer').classList.add('red');
+    } else {
+      document.getElementById('timer').classList.remove('red');
+    }
+    updateDisplay(timeLeft);
+  }
+}
+
+function resetTimer() {
+  stopTimer();
+  timeLeft = 0;
+  updateDisplay(timeLeft);
+  document.getElementById('timer').classList.remove('red');
+}
+
+function updateDisplay(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const secondsLeft = seconds % 60;
+  
+  document.getElementById('timer').innerHTML =
+    (minutes > 9 ? minutes : "0" + minutes) + ":" +
+    (secondsLeft > 9 ? secondsLeft : "0" + secondsLeft);
+}
+
+</script>
+</body>
+</html>
