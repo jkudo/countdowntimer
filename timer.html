@@ -59,24 +59,28 @@ button {
 <div id="timer">00:00</div>
 
 <div id="controls">
-  <button onclick="setTimer(300)">5分</button>
-  <button onclick="setTimer(600)">10分</button>
-  <button onclick="setTimer(900)">15分</button>
-  <button onclick="setTimer(1800)">30分</button>
+  <button onclick="setTimer(300)" class="time-button" data-minutes="5">5分</button>
+  <button onclick="setTimer(600)" class="time-button" data-minutes="10">10分</button>
+  <button onclick="setTimer(900)" class="time-button" data-minutes="15">15分</button>
+  <button onclick="setTimer(1800)" class="time-button" data-minutes="30">30分</button>
   <input type="text" id="customTimeInput" placeholder="分入力" />
-  <button onclick="setCustomTimer()">開始</button>
-  <button onclick="resetTimer()">リセット</button> <!-- リセットボタンを追加 -->
+  <button onclick="setCustomTimer()" id="set-custom-button">時間指定</button>
+  <button onclick="startTimer()" id="start-button">スタート</button>
+  <button onclick="pauseTimer()" id="pause-button">一時停止</button>
+  <button onclick="resetTimer()" id="reset-button">リセット</button>
+  <button onclick="toggleLanguage()" id="language-button">英語</button> <!-- 言語切り替えボタンを追加 -->
 </div>
 
 <script>
 let countdownTimer;
 let timeLeft = 0;
 let running = false;
+let language = 'ja';
 
 function setTimer(seconds) {
   if (!running) {
     timeLeft = seconds;
-    startTimer();
+    updateDisplay(timeLeft);
   }
 }
 
@@ -85,19 +89,18 @@ function setCustomTimer() {
   if (!isNaN(minutes) && minutes > 0) {
     setTimer(minutes * 60);
   } else {
-    alert("正しい数値を入力してください。");
+    alert(language === 'ja' ? "正しい数値を入力してください。" : "Please enter a valid number.");
   }
 }
 
 function startTimer() {
-  clearInterval(countdownTimer);
-  updateDisplay(timeLeft);
-  countdownTimer = setInterval(updateTimer, 1000);
-  running = true;
-  document.getElementById('customTimeInput').value = ''; // テキストボックスをクリア
+  if (!running && timeLeft > 0) {
+    countdownTimer = setInterval(updateTimer, 1000);
+    running = true;
+  }
 }
 
-function stopTimer() {
+function pauseTimer() {
   clearInterval(countdownTimer);
   running = false;
 }
@@ -105,8 +108,10 @@ function stopTimer() {
 function updateTimer() {
   timeLeft -= 1;
   if (timeLeft <= 0) {
+    timeLeft = 0;
+    updateDisplay(timeLeft);
     stopTimer();
-    document.getElementById('timer').innerHTML = '終了';
+    document.getElementById('timer').innerHTML = language === 'ja' ? '終了' : 'End';
     document.getElementById('timer').classList.add('red');
   } else {
     if (timeLeft <= 60) {
@@ -118,11 +123,17 @@ function updateTimer() {
   }
 }
 
+function stopTimer() {
+  clearInterval(countdownTimer);
+  running = false;
+}
+
 function resetTimer() {
   stopTimer();
   timeLeft = 0;
   updateDisplay(timeLeft);
   document.getElementById('timer').classList.remove('red');
+  document.getElementById('customTimeInput').value = ''; // テキストボックスをクリア
 }
 
 function updateDisplay(seconds) {
@@ -132,6 +143,23 @@ function updateDisplay(seconds) {
   document.getElementById('timer').innerHTML =
     (minutes > 9 ? minutes : "0" + minutes) + ":" +
     (secondsLeft > 9 ? secondsLeft : "0" + secondsLeft);
+}
+
+function toggleLanguage() {
+  language = language === 'ja' ? 'en' : 'ja';
+  document.getElementById('language-button').innerText = language === 'ja' ? '英語' : '日本語';
+  document.getElementById('set-custom-button').innerText = language === 'ja' ? '時間指定' : 'Set Time';
+  document.getElementById('start-button').innerText = language === 'ja' ? 'スタート' : 'Start';
+  document.getElementById('pause-button').innerText = language === 'ja' ? '一時停止' : 'Pause';
+  document.getElementById('reset-button').innerText = language === 'ja' ? 'リセット' : 'Reset';
+  document.getElementById('customTimeInput').placeholder = language === 'ja' ? '分入力' : 'Enter min';
+  
+  // Update time button texts
+  const timeButtons = document.querySelectorAll('.time-button');
+  timeButtons.forEach(button => {
+    const minutes = button.getAttribute('data-minutes');
+    button.innerText = language === 'ja' ? `${minutes}分` : `${minutes} min`;
+  });
 }
 
 </script>
